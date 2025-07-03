@@ -1,11 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 @import "@angular/cdk/overlay-prebuilt.css";
 
 @import "tailwindcss";
 @import "@spartan-ng/brain/hlm-tailwind-preset.css";
-
-:root {
-	--font-sans: "";
-}
 
 :root {
 	--background: 0 0% 100%;
@@ -52,6 +49,10 @@
 	--input: 240 3.7% 15.9%;
 	--ring: 240 4.9% 83.9%;
 	color-scheme: dark;
+}
+
+@theme {
+	--font-roboto: "Roboto", sans-serif;
 }
 
 @layer base {
