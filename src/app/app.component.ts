@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, signal } from "@angular/core";
+import { HlmButtonDirective } from "@spartan-ng/helm/button";
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+	selector: "app-root",
+	imports: [HlmButtonDirective],
+	templateUrl: "./app.component.html",
+	styleUrl: "./app.component.css"
 })
 export class AppComponent {
-  title = 'sorty';
+	protected readonly numbers = signal<number[]>([8, 2, -1, 4, 0, 22, 7, 12, 9, 10]);
 }
