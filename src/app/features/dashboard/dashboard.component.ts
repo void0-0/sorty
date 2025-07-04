@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { ToolbarComponent } from "./components/toolbar/toolbar.component";
 
 @Component({
-  selector: 'sorty-dashboard',
-  imports: [RouterOutlet],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+	selector: "sorty-dashboard",
+	imports: [RouterOutlet, ToolbarComponent],
+	templateUrl: "./dashboard.component.html"
 })
-export class DashboardComponent {
-	protected readonly numbers = signal<number[]>([8, 2, -1, 4, 0, 22, 7, 12, 9, 10]);
-}
+export class DashboardComponent {}
