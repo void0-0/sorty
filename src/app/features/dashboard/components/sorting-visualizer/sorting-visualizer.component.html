@@ -1,5 +1,10 @@
-<div class="flex h-full gap-2">
-	@for (number of numbers(); track number) {
-		<sorty-element [value]="number" [max]="max()" [min]="min()" />
+<div class="flex h-full grow items-end justify-center gap-2 overflow-x-auto">
+	@for (element of elements(); track element; let i = $index) {
+		<sorty-element [value]="element" [max]="max()" [min]="min()" [selected]="selectedIndexes().includes(i)" />
 	}
+</div>
+
+<div class="flex w-full justify-center gap-2">
+	<button hlmBtn variant="destructive" type="button" (click)="resetElements()">Reset Elements</button>
+	<button hlmBtn type="button" (click)="startSorting()">Start Sorting</button>
 </div>

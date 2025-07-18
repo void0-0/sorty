@@ -18,6 +18,9 @@
     "paths": {
       "@spartan-ng/helm/button": [
         "./libs/ui/ui-button-helm/src/index.ts"
+      ],
+      "@spartan-ng/helm/sonner": [
+        "./libs/ui/ui-sonner-helm/src/index.ts"
       ]
     }
   },

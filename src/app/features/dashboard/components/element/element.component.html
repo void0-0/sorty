@@ -1,6 +1,14 @@
 <div
-	[style.height.%]="maxHeight()"
-	class="bg-accent flex min-h-16 max-w-16 min-w-16 grow items-center justify-center rounded-md"
->
-	<span>{{ value() }}</span>
+	[style.height.%]="heightPercentage()"
+	class="bg-accent flex w-full items-center justify-center rounded-md"
+	[ngClass]="{ 'bg-green-500': selected(), 'bg-accent': !selected() }"
+></div>
+
+<div class="flex flex-none items-center justify-center">
+	<div
+		class="flex size-6 flex-none items-center justify-center rounded-md"
+		[ngClass]="{ 'bg-green-500': selected(), 'bg-secondary': !selected() }"
+	>
+		<span>{{ value() }}</span>
+	</div>
 </div>
