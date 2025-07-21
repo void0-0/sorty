@@ -1,6 +1,6 @@
 <div
-	[style.height.%]="heightPercentage()"
 	class="bg-accent flex w-full items-center justify-center rounded-md"
+	[style.height.%]="element().heightPercentage"
 	[ngClass]="{ 'bg-green-500': selected(), 'bg-accent': !selected() }"
 ></div>
 
@@ -9,6 +9,6 @@
 		class="flex size-6 flex-none items-center justify-center rounded-md"
 		[ngClass]="{ 'bg-green-500': selected(), 'bg-secondary': !selected() }"
 	>
-		<span>{{ value() }}</span>
+		<span>{{ element().value }}</span>
 	</div>
 </div>

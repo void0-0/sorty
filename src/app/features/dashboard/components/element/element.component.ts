@@ -1,5 +1,6 @@
 import { NgClass } from "@angular/common";
-import { Component, computed, input } from "@angular/core";
+import { Component, input } from "@angular/core";
+import { SortyElement } from "../../../../types/sorty-element.type";
 
 @Component({
 	selector: "sorty-element",
@@ -10,16 +11,6 @@ import { Component, computed, input } from "@angular/core";
 	}
 })
 export class ElementComponent {
-	// TODO: Calculate the heightPercentage of each element in the store and pass it as an input as well as the value
-	public readonly value = input.required<number>();
+	public readonly element = input.required<SortyElement<unknown>>();
 	public readonly selected = input.required<boolean>();
-	public readonly max = input.required<number>();
-	public readonly min = input.required<number>();
-
-	protected readonly heightPercentage = computed(() => {
-		const value = this.value();
-		const max = this.max();
-
-		return (value / max) * 100;
-	});
 }

@@ -1,35 +1,30 @@
 import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
 import { SortingVisualizerOptions } from "../../../../../types/sorting-visualizer-options.type";
+import { SortyElement } from "../../../../../types/sorty-element.type";
 
-type SortingVisualizerState = {
-	options: SortingVisualizerOptions;
+type SortingVisualizerState<T> = {
+	elements: SortyElement<T>[];
 	selectedIndexes: number[];
-	elements: number[];
-	max: number;
-	min: number;
+	options: SortingVisualizerOptions;
 };
 
-const initialState: SortingVisualizerState = {
+const initialState: SortingVisualizerState<unknown> = {
+	elements: [],
+	selectedIndexes: [],
 	options: {
 		minAmountOfElements: 10,
 		maxAmountOfElements: 25,
 		minValue: 0,
 		maxValue: 100,
-		iterationDelay: 100
-	},
-	selectedIndexes: [],
-	elements: [],
-	max: 0,
-	min: 0
+		iterationPauseMs: 100
+	}
 };
 
 export const SortingVisualizerStore = signalStore(
 	withState(initialState),
 	withMethods((store) => ({
-		setElements(elements: number[]): void {
+		setElements<T>(elements: SortyElement<T>[]): void {
 			patchState(store, { elements });
-			patchState(store, { max: Math.max(...elements) });
-			patchState(store, { min: Math.min(...elements) });
 		},
 		setSelectedIndexes(selectedIndexes: number[]): void {
 			patchState(store, { selectedIndexes });
