@@ -2,6 +2,8 @@ import { inject, Injectable } from "@angular/core";
 import { arePropertiesDefined } from "@recursyve/nice-ts-utils";
 import { toast } from "ngx-sonner";
 import { v4 } from "uuid";
+import { generateRandomNumber } from "../../../../../functions/generate-random-number";
+import { dumbAssSort } from "../../../../../functions/sorting-functions/dumb-ass-sort";
 import { SortingVisualizerOptions } from "../../../../../types/sorting-visualizer-options.type";
 import { SortyElement } from "../../../../../types/sorty-element.type";
 import { SortingVisualizerStore } from "./sorting-visualizer.store";
@@ -28,8 +30,8 @@ export class SortingVisualizerService {
 
 	public randomlySetElements(): void {
 		const { minAmountOfElements, maxAmountOfElements, minValue, maxValue } = this.store.options();
-		const amountOfNumbers = this.generateRandomNumber(minAmountOfElements, maxAmountOfElements);
-		const numbers = Array.from({ length: amountOfNumbers }, () => this.generateRandomNumber(minValue, maxValue));
+		const length = generateRandomNumber(minAmountOfElements, maxAmountOfElements);
+		const numbers = Array.from({ length }, () => generateRandomNumber(minValue, maxValue));
 
 		this.setElements(numbers, (number) => number);
 	}
@@ -53,34 +55,25 @@ export class SortingVisualizerService {
 
 	// TODO: Find a better way to wait than awaiting a new Promise
 	// TODO: Find a way to seperate the sorting algorithm from the visualizer's things
-	public async dumbassSort(): Promise<SortyElement<unknown>[]> {
-		const { iterationPauseMs: iterationDelay } = this.store.options();
-		const sortedElements = [...this.store.elements()];
-
-		for (let i = 0; i < sortedElements.length; i++) {
-			for (let j = 0; j < sortedElements.length - 1; j++) {
-				const elementI = sortedElements[i];
-				const elementJ = sortedElements[j];
-
-				this.store.setSelectedIndexes([i, j]);
-
-				if (elementI.value < elementJ.value) {
-					const temp = elementI;
-					sortedElements[i] = elementJ;
-					sortedElements[j] = temp;
-				}
-				this.store.setElements(sortedElements);
-				await new Promise((resolve) => setTimeout(resolve, iterationDelay));
-			}
-		}
-
+	public async sort<T>(): Promise<SortyElement<T>[]> {
+		const sortedElements = await dumbAssSort(
+			this.store.elements(),
+			this.beforeSwap.bind(this),
+			this.afterSwap.bind(this)
+		);
 		this.store.setSelectedIndexes([]);
 
-		return sortedElements;
+		return sortedElements as SortyElement<T>[];
 	}
 
-	private generateRandomNumber(min: number, max: number): number {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
+	private beforeSwap(i: number, j: number): void {
+		this.store.setSelectedIndexes([i, j]);
+	}
+
+	private async afterSwap(elements: SortyElement[]): Promise<void> {
+		const { iterationDelayMs } = this.store.options();
+		this.store.setElements(elements);
+		await new Promise((resolve) => setTimeout(resolve, iterationDelayMs));
 	}
 
 	// TODO: Get rid of this system and use a formgroup that validates the options
@@ -95,7 +88,7 @@ export class SortingVisualizerService {
 		if (arePropertiesDefined(options, "minValue", "maxValue") && options.minValue > options.maxValue) {
 			errors.push("Min value must be less than max value.");
 		}
-		if (arePropertiesDefined(options, "iterationPauseMs") && options.iterationPauseMs < 0) {
+		if (arePropertiesDefined(options, "iterationDelayMs") && options.iterationDelayMs < 0) {
 			errors.push("Iteration delay must be greater than 0.");
 		}
 

@@ -29,7 +29,7 @@ export class SortingVisualizerComponent implements OnInit {
 	private readonly options = signal<Partial<SortingVisualizerOptions>>({
 		minAmountOfElements: 25,
 		maxAmountOfElements: 35,
-		iterationPauseMs: 1
+		iterationDelayMs: 1
 	});
 
 	public ngOnInit(): void {
@@ -43,7 +43,7 @@ export class SortingVisualizerComponent implements OnInit {
 	}
 
 	protected async startSorting(): Promise<void> {
-		await this.service.dumbassSort();
+		await this.service.sort();
 	}
 
 	protected getElements(): { name: string; age: number }[] {

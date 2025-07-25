@@ -1,3 +1,3 @@
 export type GlobalSortingVisualizerOptions = {
-	iterationPauseMs: number;
+	iterationDelayMs: number;
 };

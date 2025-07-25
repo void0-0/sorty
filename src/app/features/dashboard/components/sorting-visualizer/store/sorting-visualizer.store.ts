@@ -16,7 +16,7 @@ const initialState: SortingVisualizerState<unknown> = {
 		maxAmountOfElements: 25,
 		minValue: 0,
 		maxValue: 100,
-		iterationPauseMs: 100
+		iterationDelayMs: 100
 	}
 };
 
