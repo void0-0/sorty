@@ -1,6 +1,10 @@
-import { Component, inject, OnInit, signal } from "@angular/core";
+import { Component, computed, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HlmButtonDirective } from "../../../../../../libs/ui/ui-button-helm/src";
+import { IncludesPipe } from "../../../../pipes/includes.pipe";
+import { DirectionalState } from "../../../../types/directional-state.type";
 import { SortingVisualizerOptions } from "../../../../types/sorting-visualizer-options.type";
+import { SortyTrace } from "../../../../types/sorty-trace.type";
 import { ElementComponent } from "../element/element.component";
 import { SortingVisualizerService } from "./store/sorting-visualizer.service";
 import { SortingVisualizerStore } from "./store/sorting-visualizer.store";
@@ -12,7 +16,7 @@ import { SortingVisualizerStore } from "./store/sorting-visualizer.store";
 // TODO: Revise styling, add custom colors and use them
 @Component({
 	selector: "sorty-sorting-visualizer",
-	imports: [ElementComponent, HlmButtonDirective],
+	imports: [ElementComponent, HlmButtonDirective, IncludesPipe],
 	templateUrl: "./sorting-visualizer.component.html",
 	host: {
 		class: "flex flex-col grow gap-4"
@@ -22,15 +26,18 @@ import { SortingVisualizerStore } from "./store/sorting-visualizer.store";
 export class SortingVisualizerComponent implements OnInit {
 	private readonly service = inject(SortingVisualizerService);
 	private readonly store = inject(SortingVisualizerStore);
+	private readonly destroyRef = inject(DestroyRef);
 
-	protected readonly elements = this.store.elements;
-	protected readonly selectedIndexes = this.store.selectedIndexes;
+	protected readonly traces = this.store.traces;
+	protected readonly traceIndex = this.store.traceIndex;
+	protected readonly trace = computed<SortyTrace | undefined>(() => this.traces()[this.traceIndex()]);
 
 	private readonly options = signal<Partial<SortingVisualizerOptions>>({
 		minAmountOfElements: 25,
 		maxAmountOfElements: 35,
 		iterationDelayMs: 1
 	});
+	protected readonly DirectionalState = DirectionalState;
 
 	public ngOnInit(): void {
 		this.resetElements();
@@ -38,12 +45,27 @@ export class SortingVisualizerComponent implements OnInit {
 
 	protected resetElements(): void {
 		const options = this.options();
+		this.service.reset();
 		this.service.setOptions(options);
 		this.service.randomlySetElements();
+		this.service.sort();
 	}
 
-	protected async startSorting(): Promise<void> {
-		await this.service.sort();
+	protected resumeSorting(directionalState: DirectionalState): void {
+		this.service.setDirectionalState(directionalState);
+		this.service.resumeSorting().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+	}
+
+	protected pauseSorting(): void {
+		this.service.setDirectionalState(DirectionalState.Paused);
+	}
+
+	protected nextTrace(): void {
+		this.service.incrementTraceIndex();
+	}
+
+	protected previousTrace(): void {
+		this.service.decrementTraceIndex();
 	}
 
 	protected getElements(): { name: string; age: number }[] {

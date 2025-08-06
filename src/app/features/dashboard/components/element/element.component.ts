@@ -13,4 +13,5 @@ import { SortyElement } from "../../../../types/sorty-element.type";
 export class ElementComponent {
 	public readonly element = input.required<SortyElement<unknown>>();
 	public readonly selected = input.required<boolean>();
+	public readonly swapped = input.required<boolean>();
 }

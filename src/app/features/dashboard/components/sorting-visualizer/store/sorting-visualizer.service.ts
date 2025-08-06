@@ -1,9 +1,12 @@
 import { inject, Injectable } from "@angular/core";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { arePropertiesDefined } from "@recursyve/nice-ts-utils";
 import { toast } from "ngx-sonner";
+import { combineLatest, interval, map, Observable, takeWhile } from "rxjs";
 import { v4 } from "uuid";
 import { generateRandomNumber } from "../../../../../functions/generate-random-number";
 import { dumbAssSort } from "../../../../../functions/sorting-functions/dumb-ass-sort";
+import { DirectionalState } from "../../../../../types/directional-state.type";
 import { SortingVisualizerOptions } from "../../../../../types/sorting-visualizer-options.type";
 import { SortyElement } from "../../../../../types/sorty-element.type";
 import { SortingVisualizerStore } from "./sorting-visualizer.store";
@@ -12,6 +15,12 @@ import { SortingVisualizerStore } from "./sorting-visualizer.store";
 @Injectable()
 export class SortingVisualizerService {
 	private readonly store = inject(SortingVisualizerStore);
+
+	private readonly directionalState = toObservable(this.store.directionalState);
+
+	public reset(): void {
+		this.store.reset();
+	}
 
 	public setOptions(options?: Partial<SortingVisualizerOptions>): void {
 		const mergedOptions = { ...this.store.options(), ...options };
@@ -53,27 +62,48 @@ export class SortingVisualizerService {
 		this.store.setElements(sortyElements);
 	}
 
-	// TODO: Find a better way to wait than awaiting a new Promise
+	public setDirectionalState(directionalState: DirectionalState): void {
+		this.store.setDirectionalState(directionalState);
+	}
+
 	// TODO: Find a way to seperate the sorting algorithm from the visualizer's things
-	public async sort<T>(): Promise<SortyElement<T>[]> {
-		const sortedElements = await dumbAssSort(
-			this.store.elements(),
-			this.beforeSwap.bind(this),
-			this.afterSwap.bind(this)
-		);
-		this.store.setSelectedIndexes([]);
+	public sort<T>(): SortyElement<T>[] {
+		const elements = this.store.elements();
+		const beforeSwap = this.store.pushToTraces.bind(this);
+		const afterSwap = this.store.pushToTraces.bind(this);
+		const sortedElements = dumbAssSort(elements, beforeSwap, afterSwap);
 
 		return sortedElements as SortyElement<T>[];
 	}
 
-	private beforeSwap(i: number, j: number): void {
-		this.store.setSelectedIndexes([i, j]);
+	public resumeSorting(): Observable<void> {
+		const { iterationDelayMs } = this.store.options();
+		return combineLatest([interval(iterationDelayMs), this.directionalState]).pipe(
+			takeWhile(
+				([_, directionalState]) =>
+					directionalState !== DirectionalState.Paused &&
+					this.store.traceIndex() !== 0 &&
+					this.store.traceIndex() !== this.store.traces().length - 1
+			),
+			map(([_, directionalState]) => {
+				switch (directionalState) {
+					case DirectionalState.Forward:
+						this.incrementTraceIndex();
+						break;
+					case DirectionalState.Backward:
+						this.decrementTraceIndex();
+						break;
+				}
+			})
+		);
 	}
 
-	private async afterSwap(elements: SortyElement[]): Promise<void> {
-		const { iterationDelayMs } = this.store.options();
-		this.store.setElements(elements);
-		await new Promise((resolve) => setTimeout(resolve, iterationDelayMs));
+	public incrementTraceIndex(): void {
+		this.store.incrementTraceIndex();
+	}
+
+	public decrementTraceIndex(): void {
+		this.store.decrementTraceIndex();
 	}
 
 	// TODO: Get rid of this system and use a formgroup that validates the options

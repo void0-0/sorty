@@ -1,27 +1,35 @@
 import { SortyElement } from "../../types/sorty-element.type";
+import { SortyTrace } from "../../types/sorty-trace.type";
 
-export async function dumbAssSort(
-	elements: SortyElement[],
-	beforeSwap: (i: number, j: number) => void,
-	afterSwap: (elements: SortyElement[]) => Promise<void>
-): Promise<SortyElement[]> {
-	const sortedElements = [...elements];
-	for (let i = 0; i < sortedElements.length; i++) {
-		for (let j = 0; j < sortedElements.length - 1; j++) {
-			const elementI = sortedElements[i];
-			const elementJ = sortedElements[j];
+export function dumbAssSort<T>(
+	elements: SortyElement<T>[],
+	beforeSwap: (trace: SortyTrace<T>) => void,
+	afterSwap: (trace: SortyTrace<T>) => void
+): SortyElement<T>[] {
+	const elementsCopy = [...elements];
+	for (let i = 0; i < elementsCopy.length; i++) {
+		for (let j = 0; j < elementsCopy.length - 1; j++) {
+			const elementI = elementsCopy[i];
+			const elementJ = elementsCopy[j];
 
-			beforeSwap(i, j);
-
-			if (elementI.value < elementJ.value) {
+			beforeSwap({
+				elements: [...elementsCopy],
+				selectedIndexes: [i, j],
+				swappedIndexes: []
+			});
+			const shouldSwap = elementI.value < elementJ.value;
+			if (shouldSwap) {
 				const temp = elementI;
-				sortedElements[i] = elementJ;
-				sortedElements[j] = temp;
+				elementsCopy[i] = elementJ;
+				elementsCopy[j] = temp;
 			}
-
-			await afterSwap(sortedElements);
+			afterSwap({
+				elements: [...elementsCopy],
+				selectedIndexes: [],
+				swappedIndexes: shouldSwap ? [i, j] : []
+			});
 		}
 	}
 
-	return sortedElements;
+	return elementsCopy;
 }
