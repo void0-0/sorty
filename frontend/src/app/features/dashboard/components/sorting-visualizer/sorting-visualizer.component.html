@@ -1,0 +1,22 @@
+<div class="flex h-full grow items-end justify-center gap-2 overflow-x-auto">
+	@if (trace(); as trace) {
+		@for (element of trace.elements; track element.id; let i = $index) {
+			<sorty-element
+				[element]="element"
+				[selected]="trace.selectedIndexes | includes: i"
+				[swapped]="trace.swappedIndexes | includes: i"
+			/>
+		}
+	}
+</div>
+
+<div class="flex flex-col items-center gap-2">
+	<div class="flex justify-center gap-2">
+		<button hlmBtn type="button" (click)="previousTrace()">Previous</button>
+		<button hlmBtn type="button" (click)="resumeSorting(DirectionalState.Backward)"><</button>
+		<button hlmBtn type="button" (click)="pauseSorting()">Pause</button>
+		<button hlmBtn type="button" (click)="resumeSorting(DirectionalState.Forward)">></button>
+		<button hlmBtn type="button" (click)="nextTrace()">Next</button>
+	</div>
+	<button hlmBtn variant="destructive" type="button" (click)="resetElements()">Reset Elements</button>
+</div>
